@@ -14,16 +14,18 @@ import GoogleSignIn
 
 class SpotsListViewController: UIViewController {
     
+    @IBOutlet weak var signOut: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
     var spots: Spots!
     var authUI: FUIAuth!
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        authUI = FUIAuth.defaultAuthUI()
         authUI?.delegate = self
         
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.isHidden = true
         
         
         spots = Spots()
@@ -31,6 +33,40 @@ class SpotsListViewController: UIViewController {
         spots.spotArray.append(Spot(name: "Sushi Momento", address: "Cleveland Circle", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
         spots.spotArray.append(Spot(name: "Kung Fu Tea", address: "Cleveland Circle", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        signIn()
+    }
+    
+    func signIn() {
+        let providers: [FUIAuthProvider] = [
+            FUIGoogleAuth(),
+            ]
+        //let currentUser = authUI.auth?.currentUser
+        if authUI.auth?.currentUser == nil {
+            self.authUI.providers = providers
+            present(authUI.authViewController(), animated: true, completion: nil)
+        }
+          else {
+              tableView.isHidden = false
+//            snackUser = SnackUser(user: currentUser!)
+//            snackUser.saveIfNewUser()
+        }
+    }
+    
+    @IBAction func signOut(_ sender: Any) {
+        do {
+            try authUI!.signOut()
+            print("signed out")
+            tableView.isHidden = true
+            signIn()
+        } catch {
+            print("couldnt signed out")
+            tableView.isHidden = true
+        }
+    }
+
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowSpot" {
@@ -61,7 +97,7 @@ extension SpotsListViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-extension SpotsListViewController: AuthUIDelegate {
+extension SpotsListViewController: FUIAuthDelegate {
     func application(_ app: UIApplication, open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool {
         let sourceApplication = options[UIApplication.OpenURLOptionsKey.sourceApplication] as! String?
