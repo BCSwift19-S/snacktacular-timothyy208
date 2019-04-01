@@ -29,9 +29,13 @@ class SpotsListViewController: UIViewController {
         
         
         spots = Spots()
-        spots.spotArray.append(Spot(name: "El Pelon", address: "Comm Ave", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
-        spots.spotArray.append(Spot(name: "Sushi Momento", address: "Cleveland Circle", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
-        spots.spotArray.append(Spot(name: "Kung Fu Tea", address: "Cleveland Circle", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
+
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        spots.loadData {
+            self.tableView.reloadData()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
